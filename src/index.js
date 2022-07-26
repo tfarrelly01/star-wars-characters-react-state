@@ -5,28 +5,37 @@ import { BrowserRouter as Router } from 'react-router-dom';
 
 import CharacterList from './CharacterList';
 
-import dummyData from './dummy-data';
 import endpoint from './endpoint';
-
 import './styles.scss';
 
-const Application = () => {
-
-  console.log(endpoint);
-  const [characters, setCharacters] = useState([]);
+const useFetch = url => {
+  const [response, setResponse] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch(endpoint + '/characters')
-    // fetch(`${endpoint}/characters`)
+    setLoading(true);
+    setResponse(null);
+    setError(null);
+
+    fetch(url)
       .then(response => response.json())
       .then(response => {
-        console.log(response);
-        // setCharacters(Object.values(response.characters));
-        setCharacters(response.characters);
+        setLoading(false);
+        setResponse(response);
       })
-      .catch(console.error);
-  }, []);
+      .catch(error => {
+        setLoading(false);
+        setError(error);
+      });
+    }, []);
 
+    return [response, loading, error];
+};
+
+const Application = () => {
+  const [response, loading, error] = useFetch(`${endpoint}/characters`);
+  const characters = (response && response.characters) || [];
 
   return (
     <div className="Application">
@@ -35,7 +44,12 @@ const Application = () => {
       </header>
       <main>
         <section className="sidebar">
-          <CharacterList characters={characters} />
+            {loading ? (
+              <p>Loading...</p>
+            ) : (
+              <CharacterList characters={characters} />
+            )}
+            {error && <p className="error">{error.message}</p>}
         </section>
       </main>
     </div>

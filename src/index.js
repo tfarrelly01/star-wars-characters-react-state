@@ -9,6 +9,7 @@ import dummyData from './dummy-data';
 
 import './styles.scss';
 
+
 const Application = () => {
   const [characters, setCharacters] = useState(dummyData);
 
